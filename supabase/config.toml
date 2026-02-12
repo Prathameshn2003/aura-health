@@ -1,0 +1,7 @@
+project_id = "hecfiimmqhsgwwjxewqt"
+
+[functions.health-chat]
+verify_jwt = false
+
+[functions.ml-predict]
+verify_jwt = false
