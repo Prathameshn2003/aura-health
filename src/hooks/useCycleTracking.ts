@@ -81,24 +81,26 @@ export function useCycleTracking() {
     }
 
     try {
-      // Fetch cycle logs (last 12 cycles)
-      const { data: logs, error: logsError } = await supabase
-        .from("cycle_logs")
-        .select("*")
-        .eq("user_id", user.id)
-        .order("start_date", { ascending: false })
-        .limit(12);
+      // Fetch cycle logs and settings in parallel for faster loading
+      const [logsResult, settingsResult] = await Promise.all([
+        supabase
+          .from("cycle_logs")
+          .select("*")
+          .eq("user_id", user.id)
+          .order("start_date", { ascending: false })
+          .limit(12),
+        supabase
+          .from("user_cycle_settings")
+          .select("*")
+          .eq("user_id", user.id)
+          .maybeSingle(),
+      ]);
 
-      if (logsError) throw logsError;
-      setCycleLogs((logs as CycleLog[]) || []);
+      if (logsResult.error) throw logsResult.error;
+      setCycleLogs((logsResult.data as CycleLog[]) || []);
 
-      // Fetch or create settings
-      const { data: settingsData, error: settingsError } = await supabase
-        .from("user_cycle_settings")
-        .select("*")
-        .eq("user_id", user.id)
-        .maybeSingle();
-
+      const settingsData = settingsResult.data;
+      const settingsError = settingsResult.error;
       if (settingsError && settingsError.code !== "PGRST116") throw settingsError;
 
       if (!settingsData) {
