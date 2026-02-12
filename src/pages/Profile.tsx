@@ -29,8 +29,8 @@ const Profile = () => {
 
   useEffect(() => {
     if (user) {
-      fetchProfile();
-      fetchAssessments();
+      // Fetch profile and assessments in parallel
+      Promise.all([fetchProfile(), fetchAssessments()]);
     }
   }, [user]);
 

@@ -17,9 +17,9 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Cache for admin role check to avoid duplicate calls
+// Cache for admin role check
 const adminRoleCache = new Map<string, { value: boolean; timestamp: number }>();
-const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+const CACHE_DURATION = 5 * 60 * 1000;
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
@@ -27,136 +27,111 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
   const { toast } = useToast();
-  
-  // Refs to track processed sessions and prevent duplicate calls
-  const processedSessionRef = useRef<string | null>(null);
-  const isInitializedRef = useRef(false);
+  const isMountedRef = useRef(true);
 
-  // Check admin role from database using has_role function with caching
   const checkAdminRole = useCallback(async (userId: string): Promise<boolean> => {
-    // Check cache first
     const cached = adminRoleCache.get(userId);
     if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
       return cached.value;
     }
-
     try {
       const { data, error } = await supabase.rpc('has_role', {
         _user_id: userId,
         _role: 'admin'
       });
-      
-      if (error) {
-        console.error('Error checking admin role:', error);
-        return false;
-      }
-      
-      const isAdminRole = data === true;
-      // Cache the result
-      adminRoleCache.set(userId, { value: isAdminRole, timestamp: Date.now() });
-      return isAdminRole;
-    } catch (error) {
-      console.error('Error checking admin role:', error);
+      if (error) return false;
+      const result = data === true;
+      adminRoleCache.set(userId, { value: result, timestamp: Date.now() });
+      return result;
+    } catch {
       return false;
     }
   }, []);
 
-  // Ensure profile exists for user - only run once per session
   const ensureProfileExists = useCallback(async (userId: string, fullName?: string) => {
     try {
-      const { data: existingProfile } = await supabase
+      const { data } = await supabase
         .from('profiles')
         .select('id')
         .eq('id', userId)
-        .single();
-
-      if (!existingProfile) {
-        await supabase
-          .from('profiles')
-          .insert({ 
-            id: userId,
-            full_name: fullName || null
-          });
+        .maybeSingle();
+      if (!data) {
+        await supabase.from('profiles').insert({ id: userId, full_name: fullName || null });
       }
-    } catch (error) {
-      // Profile might already exist, ignore error
+    } catch {
+      // Profile might already exist via trigger
     }
   }, []);
 
-  // Process session only once per unique session
-  const processSession = useCallback(async (newSession: Session | null) => {
-    const sessionId = newSession?.access_token || null;
-    
-    // Skip if we've already processed this session
-    if (sessionId === processedSessionRef.current) {
-      return;
-    }
-    
-    processedSessionRef.current = sessionId;
-    setSession(newSession);
-    setUser(newSession?.user ?? null);
-    
-    if (newSession?.user) {
-      const adminStatus = await checkAdminRole(newSession.user.id);
-      setIsAdmin(adminStatus);
-      
-      // Only ensure profile on initial sign-in
-      if (!isInitializedRef.current) {
-        ensureProfileExists(newSession.user.id, newSession.user.user_metadata?.full_name);
-      }
-    } else {
-      setIsAdmin(false);
-    }
-    
-    setLoading(false);
-    isInitializedRef.current = true;
-  }, [checkAdminRole, ensureProfileExists]);
-
   useEffect(() => {
-    // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      processSession(session);
-    });
+    isMountedRef.current = true;
 
-    // Listen for auth changes
+    // Set up listener FIRST (before getSession) per Supabase best practice
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
-        processSession(session);
+      (_event, newSession) => {
+        if (!isMountedRef.current) return;
+        setSession(newSession);
+        setUser(newSession?.user ?? null);
+
+        // Non-blocking admin check for ongoing changes
+        if (newSession?.user) {
+          checkAdminRole(newSession.user.id).then(admin => {
+            if (isMountedRef.current) setIsAdmin(admin);
+          });
+        } else {
+          setIsAdmin(false);
+        }
       }
     );
 
-    return () => subscription.unsubscribe();
-  }, [processSession]);
+    // Initial load — await admin check before setting loading=false
+    const initializeAuth = async () => {
+      try {
+        const { data: { session: initialSession } } = await supabase.auth.getSession();
+        if (!isMountedRef.current) return;
+
+        setSession(initialSession);
+        setUser(initialSession?.user ?? null);
+
+        if (initialSession?.user) {
+          const [adminStatus] = await Promise.all([
+            checkAdminRole(initialSession.user.id),
+            ensureProfileExists(initialSession.user.id, initialSession.user.user_metadata?.full_name),
+          ]);
+          if (isMountedRef.current) setIsAdmin(adminStatus);
+        }
+      } catch (error) {
+        console.error("Auth init error:", error);
+      } finally {
+        if (isMountedRef.current) setLoading(false);
+      }
+    };
+
+    initializeAuth();
+
+    return () => {
+      isMountedRef.current = false;
+      subscription.unsubscribe();
+    };
+  }, [checkAdminRole, ensureProfileExists]);
 
   const signUp = useCallback(async (email: string, password: string, fullName: string) => {
     try {
-      const redirectUrl = `${window.location.origin}/dashboard`;
-      
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
-          emailRedirectTo: redirectUrl,
-          data: {
-            full_name: fullName,
-          },
+          emailRedirectTo: `${window.location.origin}/dashboard`,
+          data: { full_name: fullName },
         },
       });
 
-      if (error) {
-        return { error };
-      }
+      if (error) return { error };
 
       if (data.user && data.session) {
-        toast({
-          title: "Account created!",
-          description: "Welcome to NaariCare!",
-        });
+        toast({ title: "Account created!", description: "Welcome to NaariCare!" });
       } else if (data.user && !data.session) {
-        toast({
-          title: "Account created!",
-          description: "Please check your email to verify your account.",
-        });
+        toast({ title: "Account created!", description: "Please check your email to verify your account." });
       }
 
       return { error: null };
@@ -167,49 +142,28 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const signIn = useCallback(async (email: string, password: string) => {
     try {
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-
-      if (error) {
-        return { error };
-      }
-
-      return { error: null };
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      return { error: error || null };
     } catch (error) {
       return { error: error as Error };
     }
   }, []);
 
   const signOut = useCallback(async () => {
-    // Clear cache for current user
-    if (user?.id) {
-      adminRoleCache.delete(user.id);
-    }
-    processedSessionRef.current = null;
-    
+    if (user?.id) adminRoleCache.delete(user.id);
     await supabase.auth.signOut();
     setUser(null);
     setSession(null);
     setIsAdmin(false);
-    
     window.history.replaceState(null, '', '/login');
   }, [user?.id]);
 
   const resetPassword = useCallback(async (email: string) => {
     try {
-      const redirectUrl = `${window.location.origin}/reset-password`;
-      
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: redirectUrl,
+        redirectTo: `${window.location.origin}/reset-password`,
       });
-
-      if (error) {
-        return { error };
-      }
-
-      return { error: null };
+      return { error: error || null };
     } catch (error) {
       return { error: error as Error };
     }
@@ -217,32 +171,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const updatePassword = useCallback(async (newPassword: string) => {
     try {
-      const { error } = await supabase.auth.updateUser({
-        password: newPassword,
-      });
-
-      if (error) {
-        return { error };
-      }
-
-      return { error: null };
+      const { error } = await supabase.auth.updateUser({ password: newPassword });
+      return { error: error || null };
     } catch (error) {
       return { error: error as Error };
     }
   }, []);
 
   return (
-    <AuthContext.Provider value={{ 
-      user, 
-      session, 
-      loading, 
-      isAdmin, 
-      signUp, 
-      signIn, 
-      signOut,
-      resetPassword,
-      updatePassword
-    }}>
+    <AuthContext.Provider value={{ user, session, loading, isAdmin, signUp, signIn, signOut, resetPassword, updatePassword }}>
       {children}
     </AuthContext.Provider>
   );
