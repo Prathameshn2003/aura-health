@@ -17,10 +17,14 @@ import {
   Heart,
   Scale,
   Droplets,
-  Baby,
   Stethoscope,
   Brain,
-  Loader2
+  Loader2,
+  TestTube,
+  Microscope,
+  ShieldCheck,
+  FileText,
+  CheckCircle2
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
@@ -112,7 +116,7 @@ const PCOSModule = () => {
       <Header />
       <main className="pt-24 pb-16">
         <div className="container mx-auto px-4 max-w-4xl">
-          {/* Improved Progress Indicator */}
+          {/* Progress Indicator */}
           <div className="mb-10">
             <div className="flex items-center justify-between mb-2">
               {stepLabels.map((label, i) => (
@@ -148,7 +152,7 @@ const PCOSModule = () => {
             </div>
           </div>
 
-          {/* Education Step - Improved Visual Layout */}
+          {/* Education Step - Clinical Version */}
           {currentStep === "education" && (
             <motion.div
               initial={{ opacity: 0 }}
@@ -165,114 +169,162 @@ const PCOSModule = () => {
                 >
                   <Activity className="w-12 h-12 text-accent" />
                 </motion.div>
-                <h1 className="font-heading text-3xl md:text-4xl font-bold text-foreground mb-4">
-                  Understanding PCOS
+                <h1 className="font-heading text-3xl md:text-4xl font-bold text-foreground mb-3">
+                  🌸 PCOS Clinical Risk Assessment
                 </h1>
                 <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-                  Polycystic Ovary Syndrome affects <span className="text-accent font-semibold">1 in 10 women</span>. 
-                  Learn about symptoms, risk factors, and get a personalized assessment.
+                  Accurate AI-Based Hormonal Evaluation
+                </p>
+                <p className="text-muted-foreground text-sm max-w-xl mx-auto mt-3">
+                  This assessment provides a clinically informed PCOS risk evaluation using medical data and symptoms. 
+                  For accurate prediction, <span className="font-semibold text-foreground">correct clinical test values are required.</span>
                 </p>
               </div>
 
-              {/* Quick Stats Visual */}
-              <div className="grid grid-cols-3 gap-4">
-                <motion.div
-                  initial={{ y: 20, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  transition={{ delay: 0.1 }}
-                  className="glass-card rounded-xl p-4 text-center"
-                >
-                  <div className="text-3xl font-bold text-accent">10%</div>
-                  <div className="text-xs text-muted-foreground">Women Affected</div>
-                </motion.div>
-                <motion.div
-                  initial={{ y: 20, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  transition={{ delay: 0.2 }}
-                  className="glass-card rounded-xl p-4 text-center"
-                >
-                  <div className="text-3xl font-bold text-primary">15+</div>
-                  <div className="text-xs text-muted-foreground">Symptoms Analyzed</div>
-                </motion.div>
-                <motion.div
-                  initial={{ y: 20, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  transition={{ delay: 0.3 }}
-                  className="glass-card rounded-xl p-4 text-center"
-                >
-                  <div className="text-3xl font-bold text-teal">ML</div>
-                  <div className="text-xs text-muted-foreground">Powered Analysis</div>
-                </motion.div>
-              </div>
-
-              {/* Education Cards */}
-              <div className="space-y-4">
-                <EducationCard
-                  icon={AlertCircle}
-                  title="What is PCOS?"
-                  description="A hormonal disorder where ovaries produce excess androgens, affecting ovulation and causing various symptoms. It's one of the leading causes of infertility."
-                  color="accent"
-                  delay={0.1}
-                />
-                
-                <EducationCard
-                  icon={Droplets}
-                  title="Common Symptoms"
-                  description=""
-                  items={[
-                    "Irregular or missed periods",
-                    "Excess hair growth (hirsutism)",
-                    "Acne and oily skin",
-                    "Weight gain, especially around waist",
-                    "Hair thinning on scalp",
-                    "Difficulty getting pregnant"
-                  ]}
-                  color="primary"
-                  delay={0.2}
-                />
-                
-                <EducationCard
-                  icon={Scale}
-                  title="Risk Factors"
-                  description=""
-                  items={[
-                    "Family history of PCOS",
-                    "Insulin resistance or Type 2 diabetes",
-                    "Obesity or excess weight",
-                    "Early puberty (before age 8)"
-                  ]}
-                  color="teal"
-                  delay={0.3}
-                />
-              </div>
-
-              {/* How It Works Visual */}
+              {/* How NaariCare AI Works */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.4 }}
+                transition={{ delay: 0.1 }}
                 className="glass-card rounded-2xl p-6 border border-accent/30"
               >
                 <div className="flex items-center gap-3 mb-4">
                   <div className="w-10 h-10 rounded-lg bg-accent/20 flex items-center justify-center">
                     <Brain className="w-5 h-5 text-accent" />
                   </div>
-                  <h3 className="font-heading text-lg font-semibold text-foreground">How Our ML Assessment Works</h3>
+                  <h3 className="font-heading text-lg font-semibold text-foreground">🧠 How NaariCare AI Works</h3>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <p className="text-sm text-muted-foreground mb-4">
+                  NaariCare's machine learning model analyzes your data against medically validated patterns to estimate PCOS risk:
+                </p>
+                <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
                   {[
-                    { step: 1, title: "Input Data", desc: "Answer 15 health questions" },
-                    { step: 2, title: "ML Analysis", desc: "Random Forest + XGBoost ensemble" },
-                    { step: 3, title: "Get Results", desc: "Personalized risk assessment" },
+                    { icon: "🩸", label: "Menstrual cycle info" },
+                    { icon: "⚖️", label: "Body measurements" },
+                    { icon: "🌸", label: "Symptoms" },
+                    { icon: "🩺", label: "Ultrasound findings" },
+                    { icon: "🧪", label: "Blood hormone levels" },
                   ].map((item, i) => (
-                    <div key={i} className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-accent text-accent-foreground flex items-center justify-center text-sm font-bold">
-                        {item.step}
-                      </div>
-                      <div>
-                        <div className="font-medium text-foreground text-sm">{item.title}</div>
-                        <div className="text-xs text-muted-foreground">{item.desc}</div>
-                      </div>
+                    <motion.div
+                      key={i}
+                      initial={{ y: 10, opacity: 0 }}
+                      animate={{ y: 0, opacity: 1 }}
+                      transition={{ delay: 0.15 + i * 0.05 }}
+                      className="text-center p-3 rounded-xl bg-muted/50"
+                    >
+                      <div className="text-2xl mb-1">{item.icon}</div>
+                      <div className="text-xs text-muted-foreground">{item.label}</div>
+                    </motion.div>
+                  ))}
+                </div>
+              </motion.div>
+
+              {/* Information Required */}
+              <div className="space-y-4">
+                <h3 className="font-heading text-lg font-semibold text-foreground px-1">
+                  📋 Information Required Before You Begin
+                </h3>
+
+                <EducationCard
+                  icon={Scale}
+                  title="✅ Basic Health Details"
+                  description=""
+                  items={[
+                    "Age, Height, Weight",
+                    "Cycle regularity & average cycle length",
+                    "Symptoms: acne, hair growth, weight gain",
+                  ]}
+                  color="teal"
+                  delay={0.1}
+                />
+
+                <EducationCard
+                  icon={Microscope}
+                  title="🩺 Ultrasound Report (Required)"
+                  description="From your pelvic sonography report:"
+                  items={[
+                    "🥚 Follicle count – Left ovary",
+                    "🥚 Follicle count – Right ovary",
+                    "📄 Endometrium thickness (mm)",
+                  ]}
+                  color="accent"
+                  delay={0.2}
+                />
+
+                <EducationCard
+                  icon={TestTube}
+                  title="🧪 Blood Test Report (Required)"
+                  description="Hormone profile blood test values:"
+                  items={[
+                    "LH (Luteinizing Hormone)",
+                    "FSH (Follicle Stimulating Hormone)",
+                    "Testosterone (Total)",
+                    "Insulin (Fasting)",
+                  ]}
+                  color="primary"
+                  delay={0.3}
+                />
+              </div>
+
+              {/* Important Accuracy Notice */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.35 }}
+                className="p-5 rounded-2xl bg-destructive/10 border border-destructive/20"
+              >
+                <div className="flex items-start gap-3">
+                  <AlertCircle className="w-5 h-5 text-destructive mt-0.5 flex-shrink-0" />
+                  <div>
+                    <h4 className="font-semibold text-destructive mb-2">⚠️ Important Accuracy Notice</h4>
+                    <ul className="space-y-1 text-sm text-muted-foreground">
+                      <li className="flex items-start gap-2">
+                        <CheckCircle2 className="w-4 h-4 text-destructive flex-shrink-0 mt-0.5" />
+                        Use official medical reports only
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <CheckCircle2 className="w-4 h-4 text-destructive flex-shrink-0 mt-0.5" />
+                        Enter values exactly as written in reports
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <CheckCircle2 className="w-4 h-4 text-destructive flex-shrink-0 mt-0.5" />
+                        Ensure measurements are in correct units
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <CheckCircle2 className="w-4 h-4 text-destructive flex-shrink-0 mt-0.5" />
+                        If reports are unavailable, consult a gynecologist first
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </motion.div>
+
+              {/* Why Medical Reports Are Required */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4 }}
+                className="glass-card rounded-2xl p-6"
+              >
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-10 h-10 rounded-lg bg-teal/20 flex items-center justify-center">
+                    <ShieldCheck className="w-5 h-5 text-teal" />
+                  </div>
+                  <h3 className="font-heading text-lg font-semibold text-foreground">🏥 Why Medical Reports Are Required</h3>
+                </div>
+                <p className="text-sm text-muted-foreground mb-4">
+                  PCOS diagnosis is based on clinical symptoms, ultrasound findings, and hormonal imbalance. 
+                  NaariCare follows the same clinical logic to provide a data-driven risk evaluation.
+                </p>
+                <div className="grid grid-cols-3 gap-3">
+                  {[
+                    { label: "Higher accuracy", icon: "🎯" },
+                    { label: "Reliable estimation", icon: "📊" },
+                    { label: "Transparent AI", icon: "🔍" },
+                  ].map((item, i) => (
+                    <div key={i} className="text-center p-3 rounded-xl bg-teal/10">
+                      <div className="text-xl mb-1">{item.icon}</div>
+                      <div className="text-xs font-medium text-foreground">{item.label}</div>
                     </div>
                   ))}
                 </div>
@@ -283,7 +335,7 @@ const PCOSModule = () => {
               <div className="text-center">
                 <Button size="lg" onClick={() => setCurrentStep("assessment")} className="group text-lg px-8">
                   <Sparkles className="w-5 h-5 mr-2" />
-                  Start Assessment
+                  Start Clinical Assessment
                   <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
                 </Button>
               </div>
@@ -298,10 +350,10 @@ const PCOSModule = () => {
             >
               <div className="text-center mb-8">
                 <h1 className="font-heading text-2xl md:text-3xl font-bold text-foreground mb-2">
-                  PCOS Risk Assessment
+                  PCOS Clinical Risk Assessment
                 </h1>
                 <p className="text-muted-foreground">
-                  Answer honestly for accurate results • Takes ~3 minutes
+                  Enter values from your medical reports • Takes ~5 minutes
                 </p>
               </div>
 
@@ -310,7 +362,7 @@ const PCOSModule = () => {
               <div className="text-center mt-6">
                 <Button variant="ghost" onClick={() => setCurrentStep("education")}>
                   <ArrowLeft className="w-4 h-4 mr-2" />
-                  Back to Education
+                  Back to Information
                 </Button>
               </div>
             </motion.div>
@@ -330,7 +382,7 @@ const PCOSModule = () => {
                 Analyzing with ML Model...
               </h2>
               <p className="text-muted-foreground text-sm max-w-sm text-center">
-                Running your data through our trained Random Forest + XGBoost ensemble model
+                Running your clinical data through our trained Random Forest + XGBoost ensemble model
               </p>
               <div className="flex gap-1 mt-6">
                 {[0, 1, 2].map(i => (
