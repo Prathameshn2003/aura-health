@@ -10,6 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 export interface PCOSInputData {
   age: number;
+  height: number; // cm
   weight: number;
   bmi: number;
   cycleRegular: boolean; // true = regular, false = irregular
@@ -24,6 +25,11 @@ export interface PCOSInputData {
   follicleLeft: number;
   follicleRight: number;
   endometrium: number;
+  // Clinical blood test values
+  lh: number; // Luteinizing Hormone (mIU/mL)
+  fsh: number; // Follicle Stimulating Hormone (mIU/mL)
+  testosterone: number; // Total Testosterone (ng/dL)
+  insulin: number; // Fasting Insulin (µIU/mL)
 }
 
 export interface PCOSResult {
