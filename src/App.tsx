@@ -29,6 +29,7 @@ const Schemes = lazy(() => import("./pages/Schemes"));
 const HealthResources = lazy(() => import("./pages/HealthResources"));
 const Hygiene = lazy(() => import("./pages/Hygiene"));
 const Education = lazy(() => import("./pages/Education"));
+const Documents = lazy(() => import("./pages/Documents"));
 const Privacy = lazy(() => import("./pages/Privacy"));
 const Terms = lazy(() => import("./pages/Terms"));
 const Contact = lazy(() => import("./pages/Contact"));
@@ -95,6 +96,7 @@ const App = () => (
               <Route path="/health-resources" element={<ProtectedRoute><HealthResources /></ProtectedRoute>} />
               <Route path="/hygiene" element={<ProtectedRoute><Hygiene /></ProtectedRoute>} />
               <Route path="/education" element={<ProtectedRoute><Education /></ProtectedRoute>} />
+              <Route path="/dashboard/documents" element={<ProtectedRoute><Documents /></ProtectedRoute>} />
               
               {/* Redirect old education paths to modules */}
               <Route path="/education/pcos" element={<Navigate to="/modules/pcos" replace />} />
