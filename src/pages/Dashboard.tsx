@@ -12,6 +12,7 @@ import { differenceInDays, parseISO, format } from "date-fns";
 import { useMemo } from "react";
 
 const dashboardSections = [
+  { icon: FileText, title: "Medical Reports", description: "Upload & manage documents", path: "/dashboard/documents", color: "text-accent", bgColor: "bg-accent/15" },
   { icon: Stethoscope, title: "Find Doctors", description: "Connect with specialists", path: "/doctors", color: "text-teal", bgColor: "bg-teal/15" },
   { icon: BookOpen, title: "Health Resources", description: "Educational content", path: "/health-resources", color: "text-primary", bgColor: "bg-primary/15" },
   { icon: FileText, title: "Govt. Schemes", description: "Explore health benefits", path: "/schemes", color: "text-accent", bgColor: "bg-accent/15" },

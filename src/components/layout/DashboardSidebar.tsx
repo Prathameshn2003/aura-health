@@ -33,6 +33,7 @@ const userNavItems = [
   { title: "Health Resources", path: "/health-resources", icon: BookOpen },
   { title: "Govt. Schemes", path: "/schemes", icon: FileText },
   { title: "Hygiene & Wellness", path: "/hygiene", icon: Sparkles },
+  { title: "Medical Reports", path: "/dashboard/documents", icon: FileText },
   { title: "AI Chatbot", path: "/chatbot", icon: MessageCircle },
   { title: "My Profile", path: "/profile", icon: User },
 ];
