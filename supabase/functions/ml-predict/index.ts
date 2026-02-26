@@ -42,7 +42,7 @@ serve(async (req) => {
         endpoint = "/predict/menopause";
         break;
       case "cycle":
-        endpoint = "/predict/cycle";
+        endpoint = "/predict/menstrual";
         break;
       default:
         return new Response(
