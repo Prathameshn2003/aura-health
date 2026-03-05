@@ -7,6 +7,7 @@ import { HealthDisclaimer } from "@/components/health/HealthDisclaimer";
 import { MenopauseAssessmentForm } from "@/components/health/MenopauseAssessmentForm";
 import { MenopauseResultsDisplay } from "@/components/health/MenopauseResultsDisplay";
 import { EducationCard } from "@/components/health/EducationCard";
+import { Droplets, TestTube, ScanLine, AlertTriangle } from "lucide-react";
 
 import { 
   Thermometer, 
@@ -270,6 +271,75 @@ const MenopauseModule = () => {
                       </div>
                     </motion.div>
                   ))}
+                </div>
+              </motion.div>
+
+              {/* Medical Tests Section */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+                className="glass-card rounded-2xl p-6"
+              >
+                <h3 className="font-heading text-lg font-semibold text-foreground mb-2 flex items-center gap-2">
+                  <TestTube className="w-5 h-5 text-primary" />
+                  Recommended Medical Tests
+                </h3>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Menopause prediction should be supported by medical test results — hormone levels and reproductive health indicators provide more accurate insights.
+                </p>
+                <div className="space-y-4">
+                  <EducationCard
+                    icon={Droplets}
+                    title="Estrogen Test"
+                    description="Low estrogen levels may indicate declining ovarian function — a key marker of menopause transition."
+                    color="primary"
+                    delay={0.1}
+                  />
+                  <EducationCard
+                    icon={TestTube}
+                    title="FSH (Follicle Stimulating Hormone) Test"
+                    description="Higher FSH levels may suggest perimenopause or menopause. Your doctor can interpret these alongside other symptoms."
+                    color="accent"
+                    delay={0.2}
+                  />
+                </div>
+              </motion.div>
+
+              {/* Pelvic Sonography */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4 }}
+                className="glass-card rounded-2xl p-6"
+              >
+                <h3 className="font-heading text-lg font-semibold text-foreground mb-2 flex items-center gap-2">
+                  <ScanLine className="w-5 h-5 text-teal" />
+                  Pelvic Sonography (Ultrasound)
+                </h3>
+                <p className="text-sm text-muted-foreground mb-3">
+                  Blood tests alone are not enough — an ultrasound helps doctors examine your reproductive organs for a complete picture.
+                </p>
+                <ul className="space-y-2 text-sm text-muted-foreground">
+                  {["Check ovarian size and follicle count", "Observe uterine lining thickness", "Detect cysts or abnormalities"].map((item, i) => (
+                    <li key={i} className="flex items-start gap-2">
+                      <span className="w-1.5 h-1.5 rounded-full bg-teal mt-1.5 flex-shrink-0" />
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              </motion.div>
+
+              {/* Important Note */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.5 }}
+                className="flex items-start gap-3 p-4 rounded-xl bg-accent/10 border border-accent/20"
+              >
+                <AlertTriangle className="w-5 h-5 text-accent mt-0.5 flex-shrink-0" />
+                <div className="text-sm text-muted-foreground">
+                  <strong className="text-foreground">Important:</strong> This assessment provides an estimate based on symptoms. For a confirmed diagnosis, consult your gynecologist with hormone test results and a pelvic ultrasound report.
                 </div>
               </motion.div>
 

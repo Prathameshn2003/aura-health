@@ -36,7 +36,7 @@ const features = [
     title: "Diet & Fitness Plans",
     description: "Personalized nutrition and exercise recommendations tailored to your health profile.",
     color: "secondary",
-    path: "/recommendations",
+    path: "/education",
   },
   {
     icon: MessageCircle,
