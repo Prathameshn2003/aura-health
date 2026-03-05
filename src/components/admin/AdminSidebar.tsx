@@ -5,7 +5,8 @@ import {
   FileText,
   Menu,
   X,
-  ChevronRight
+  ChevronRight,
+  Stethoscope
 } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -15,6 +16,7 @@ const navItems = [
   { title: "Users", url: "/admin/users", icon: Users },
   { title: "Resources", url: "/admin/resources", icon: BookOpen },
   { title: "Schemes", url: "/admin/schemes", icon: FileText },
+  { title: "Doctors", url: "/admin/doctors", icon: Stethoscope },
 ];
 
 export const AdminSidebar = () => {

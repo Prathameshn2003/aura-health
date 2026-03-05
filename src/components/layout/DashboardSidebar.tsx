@@ -44,6 +44,7 @@ const adminNavItems = [
   { title: "Manage Users", path: "/admin/users", icon: Users },
   { title: "Health Resources", path: "/admin/resources", icon: BookOpen },
   { title: "Govt. Schemes", path: "/admin/schemes", icon: FileText },
+  { title: "Manage Doctors", path: "/admin/doctors", icon: Stethoscope },
 ];
 
 export const DashboardSidebar = () => {

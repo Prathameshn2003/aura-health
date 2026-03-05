@@ -1,25 +1,24 @@
 import { useState, useCallback } from "react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   FileText, Upload, Trash2, ExternalLink, Loader2,
-  FileImage, File, AlertCircle, X, CheckCircle2
+  FileImage, File, Download, CheckCircle2, Pencil
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
+  AlertDialog, AlertDialogAction, AlertDialogCancel,
+  AlertDialogContent, AlertDialogDescription, AlertDialogFooter,
+  AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue
+} from "@/components/ui/select";
 
 interface DocumentRow {
   id: string;
@@ -32,7 +31,18 @@ interface DocumentRow {
 }
 
 const ALLOWED_TYPES = ["application/pdf", "image/jpeg", "image/png"];
-const MAX_SIZE = 10 * 1024 * 1024; // 10MB
+const MAX_SIZE = 10 * 1024 * 1024;
+
+const LABEL_OPTIONS = [
+  "Medical Report",
+  "Test Report",
+  "Sonography Report",
+  "Blood Test",
+  "Prescription",
+  "X-Ray / Scan",
+  "Discharge Summary",
+  "Other",
+];
 
 const formatFileSize = (bytes: number) => {
   if (bytes < 1024) return `${bytes} B`;
@@ -52,8 +62,9 @@ const Documents = () => {
   const [dragOver, setDragOver] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<DocumentRow | null>(null);
+  const [docLabel, setDocLabel] = useState("Medical Report");
+  const [customLabel, setCustomLabel] = useState("");
 
-  // Fetch documents
   const { data: documents = [], isLoading } = useQuery({
     queryKey: ["documents", user?.id],
     queryFn: async () => {
@@ -67,20 +78,13 @@ const Documents = () => {
     enabled: !!user,
   });
 
-  // Delete mutation
   const deleteMutation = useMutation({
     mutationFn: async (doc: DocumentRow) => {
-      // Delete from storage
       const { error: storageError } = await supabase.storage
         .from("medical-documents")
         .remove([doc.file_path]);
       if (storageError) throw storageError;
-
-      // Delete from DB
-      const { error: dbError } = await supabase
-        .from("documents")
-        .delete()
-        .eq("id", doc.id);
+      const { error: dbError } = await supabase.from("documents").delete().eq("id", doc.id);
       if (dbError) throw dbError;
     },
     onSuccess: () => {
@@ -93,10 +97,10 @@ const Documents = () => {
     },
   });
 
-  // Upload handler
   const handleUpload = useCallback(async (files: FileList | File[]) => {
     if (!user) return;
     const fileArray = Array.from(files);
+    const label = docLabel === "Other" ? (customLabel || "Document") : docLabel;
 
     for (const file of fileArray) {
       if (!ALLOWED_TYPES.includes(file.type)) {
@@ -113,6 +117,7 @@ const Documents = () => {
         const timestamp = Date.now();
         const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
         const filePath = `${user.id}/${timestamp}_${safeName}`;
+        const displayName = `${label} - ${file.name}`;
 
         const { error: uploadError } = await supabase.storage
           .from("medical-documents")
@@ -121,14 +126,14 @@ const Documents = () => {
 
         const { error: dbError } = await supabase.from("documents").insert({
           user_id: user.id,
-          file_name: file.name,
+          file_name: displayName,
           file_path: filePath,
           file_type: file.type,
           file_size: file.size,
         });
         if (dbError) throw dbError;
 
-        toast({ title: "Uploaded", description: `${file.name} uploaded successfully.` });
+        toast({ title: "Uploaded", description: `${displayName} uploaded successfully.` });
         queryClient.invalidateQueries({ queryKey: ["documents"] });
       } catch (err) {
         console.error("Upload failed:", err);
@@ -137,9 +142,8 @@ const Documents = () => {
         setUploading(false);
       }
     }
-  }, [user, queryClient]);
+  }, [user, queryClient, docLabel, customLabel]);
 
-  // View handler (signed URL)
   const handleView = async (doc: DocumentRow) => {
     const { data, error } = await supabase.storage
       .from("medical-documents")
@@ -151,7 +155,26 @@ const Documents = () => {
     window.open(data.signedUrl, "_blank");
   };
 
-  // Drag & Drop handlers
+  const handleDownload = async (doc: DocumentRow) => {
+    try {
+      const { data, error } = await supabase.storage
+        .from("medical-documents")
+        .createSignedUrl(doc.file_path, 60, { download: true });
+      if (error || !data?.signedUrl) throw new Error("Failed to generate download URL");
+
+      const link = document.createElement("a");
+      link.href = data.signedUrl;
+      link.download = doc.file_name;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      toast({ title: "Download started", description: `${doc.file_name} is downloading.` });
+    } catch {
+      toast({ title: "Download failed", description: "Could not download the file.", variant: "destructive" });
+    }
+  };
+
   const onDragOver = (e: React.DragEvent) => { e.preventDefault(); setDragOver(true); };
   const onDragLeave = () => setDragOver(false);
   const onDrop = (e: React.DragEvent) => {
@@ -163,7 +186,6 @@ const Documents = () => {
   return (
     <DashboardLayout>
       <div className="space-y-6 animate-fade-up max-w-4xl mx-auto">
-        {/* Header */}
         <div>
           <h1 className="font-heading text-2xl md:text-3xl font-bold text-foreground">
             📄 My Medical Reports
@@ -173,15 +195,40 @@ const Documents = () => {
           </p>
         </div>
 
+        {/* Document Label Selector */}
+        <div className="glass-card rounded-2xl p-5">
+          <label className="text-sm font-medium text-foreground mb-2 block">
+            Document Type
+          </label>
+          <div className="flex flex-col sm:flex-row gap-3">
+            <Select value={docLabel} onValueChange={setDocLabel}>
+              <SelectTrigger className="sm:w-64">
+                <SelectValue placeholder="Select type" />
+              </SelectTrigger>
+              <SelectContent>
+                {LABEL_OPTIONS.map((opt) => (
+                  <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {docLabel === "Other" && (
+              <Input
+                placeholder="Enter custom label..."
+                value={customLabel}
+                onChange={(e) => setCustomLabel(e.target.value)}
+                className="sm:w-64"
+              />
+            )}
+          </div>
+        </div>
+
         {/* Upload Zone */}
         <motion.div
           onDragOver={onDragOver}
           onDragLeave={onDragLeave}
           onDrop={onDrop}
           className={`relative border-2 border-dashed rounded-2xl p-8 text-center transition-all duration-300 ${
-            dragOver
-              ? "border-accent bg-accent/10 scale-[1.01]"
-              : "border-border hover:border-accent/50 bg-muted/30"
+            dragOver ? "border-accent bg-accent/10 scale-[1.01]" : "border-border hover:border-accent/50 bg-muted/30"
           }`}
         >
           {uploading ? (
@@ -192,12 +239,8 @@ const Documents = () => {
           ) : (
             <>
               <Upload className="w-10 h-10 text-accent mx-auto mb-3" />
-              <p className="font-medium text-foreground mb-1">
-                Drag & drop files here
-              </p>
-              <p className="text-sm text-muted-foreground mb-4">
-                PDF, JPG, PNG • Max 10MB
-              </p>
+              <p className="font-medium text-foreground mb-1">Drag & drop files here</p>
+              <p className="text-sm text-muted-foreground mb-4">PDF, JPG, PNG • Max 10MB</p>
               <label>
                 <input
                   type="file"
@@ -207,10 +250,7 @@ const Documents = () => {
                   onChange={(e) => e.target.files && handleUpload(e.target.files)}
                 />
                 <Button variant="outline" className="cursor-pointer" asChild>
-                  <span>
-                    <Upload className="w-4 h-4 mr-2" />
-                    Browse Files
-                  </span>
+                  <span><Upload className="w-4 h-4 mr-2" />Browse Files</span>
                 </Button>
               </label>
             </>
@@ -239,9 +279,7 @@ const Documents = () => {
             <div className="text-center py-12 glass-card rounded-2xl">
               <FileText className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
               <p className="text-muted-foreground">No documents uploaded yet</p>
-              <p className="text-sm text-muted-foreground mt-1">
-                Upload your medical reports to keep them organized
-              </p>
+              <p className="text-sm text-muted-foreground mt-1">Upload your medical reports to keep them organized</p>
             </div>
           ) : (
             <div className="grid gap-3">
@@ -268,14 +306,13 @@ const Documents = () => {
                       </div>
                     </div>
                     <div className="flex gap-2">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => handleView(doc)}
-                        className="gap-1.5"
-                      >
+                      <Button size="sm" variant="outline" onClick={() => handleView(doc)} className="gap-1.5">
                         <ExternalLink className="w-3.5 h-3.5" />
                         <span className="hidden sm:inline">View</span>
+                      </Button>
+                      <Button size="sm" variant="outline" onClick={() => handleDownload(doc)} className="gap-1.5">
+                        <Download className="w-3.5 h-3.5" />
+                        <span className="hidden sm:inline">Download</span>
                       </Button>
                       <Button
                         size="sm"
@@ -294,7 +331,6 @@ const Documents = () => {
         </div>
       </div>
 
-      {/* Delete Confirmation */}
       <AlertDialog open={!!deleteTarget} onOpenChange={() => setDeleteTarget(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>

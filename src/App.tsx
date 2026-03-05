@@ -39,6 +39,7 @@ const NotFound = lazy(() => import("./pages/NotFound"));
 const AdminUsersPage = lazy(() => import("./pages/admin/AdminUsersPage"));
 const AdminResourcesPage = lazy(() => import("./pages/admin/AdminResourcesPage"));
 const AdminSchemesPage = lazy(() => import("./pages/admin/AdminSchemesPage"));
+const AdminDoctorsPage = lazy(() => import("./pages/admin/AdminDoctorsPage"));
 
 // Optimized QueryClient with caching
 const queryClient = new QueryClient({
@@ -108,6 +109,7 @@ const App = () => (
               <Route path="/admin/users" element={<ProtectedRoute requireAdmin><AdminUsersPage /></ProtectedRoute>} />
               <Route path="/admin/resources" element={<ProtectedRoute requireAdmin><AdminResourcesPage /></ProtectedRoute>} />
               <Route path="/admin/schemes" element={<ProtectedRoute requireAdmin><AdminSchemesPage /></ProtectedRoute>} />
+              <Route path="/admin/doctors" element={<ProtectedRoute requireAdmin><AdminDoctorsPage /></ProtectedRoute>} />
               
               <Route path="*" element={<NotFound />} />
             </Routes>
