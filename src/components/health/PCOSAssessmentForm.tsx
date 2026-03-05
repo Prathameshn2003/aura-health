@@ -549,47 +549,9 @@ export const PCOSAssessmentForm = ({ onSubmit }: PCOSAssessmentFormProps) => {
               </div>
             </div>
 
-            {/* LH/FSH Ratio Alert */}
-            {formData.fsh > 0 && formData.lh / formData.fsh > 2 && (
-              <div className="p-3 rounded-lg bg-destructive/10 border border-destructive/20 text-sm text-destructive">
-                ⚠️ LH/FSH ratio is {(formData.lh / formData.fsh).toFixed(1)} (elevated). A ratio above 2:1 is often associated with PCOS.
-              </div>
-            )}
+            
 
-            {formData.testosterone > 70 && (
-              <div className="p-3 rounded-lg bg-destructive/10 border border-destructive/20 text-sm text-destructive">
-                ⚠️ Testosterone level is elevated ({formData.testosterone} ng/dL). This is a common indicator of PCOS.
-              </div>
-            )}
-
-            {formData.insulin > 25 && (
-              <div className="p-3 rounded-lg bg-accent/10 border border-accent/20 text-sm text-accent">
-                ⚠️ Insulin level is elevated ({formData.insulin} µIU/mL). This may indicate insulin resistance.
-              </div>
-            )}
-
-            {/* Summary Grid */}
-            <div className="grid grid-cols-4 gap-3 p-4 rounded-xl bg-muted/50">
-              <div className="text-center">
-                <div className="text-lg font-bold text-foreground">{formData.lh}</div>
-                <div className="text-xs text-muted-foreground">LH</div>
-              </div>
-              <div className="text-center">
-                <div className="text-lg font-bold text-foreground">{formData.fsh}</div>
-                <div className="text-xs text-muted-foreground">FSH</div>
-              </div>
-              <div className="text-center">
-                <div className="text-lg font-bold text-foreground">{formData.testosterone}</div>
-                <div className="text-xs text-muted-foreground">Testosterone</div>
-              </div>
-              <div className="text-center">
-                <div className="text-lg font-bold text-foreground">{formData.insulin}</div>
-                <div className="text-xs text-muted-foreground">Insulin</div>
-              </div>
-            </div>
-          </div>
-        )}
-
+        
         {/* Navigation Buttons */}
         <div className="flex justify-between mt-8 pt-6 border-t border-border">
           <Button
