@@ -154,46 +154,64 @@ export type Database = {
       }
       doctors: {
         Row: {
+          city: string | null
           created_at: string
           description: string | null
           email: string | null
+          experience: number | null
           hospital: string | null
           id: string
           image_url: string | null
           is_active: boolean | null
+          latitude: number | null
           location: string | null
+          longitude: number | null
           name: string
           phone: string | null
+          recommended: boolean | null
           specialization: string
           updated_at: string
+          verified: boolean | null
         }
         Insert: {
+          city?: string | null
           created_at?: string
           description?: string | null
           email?: string | null
+          experience?: number | null
           hospital?: string | null
           id?: string
           image_url?: string | null
           is_active?: boolean | null
+          latitude?: number | null
           location?: string | null
+          longitude?: number | null
           name: string
           phone?: string | null
+          recommended?: boolean | null
           specialization: string
           updated_at?: string
+          verified?: boolean | null
         }
         Update: {
+          city?: string | null
           created_at?: string
           description?: string | null
           email?: string | null
+          experience?: number | null
           hospital?: string | null
           id?: string
           image_url?: string | null
           is_active?: boolean | null
+          latitude?: number | null
           location?: string | null
+          longitude?: number | null
           name?: string
           phone?: string | null
+          recommended?: boolean | null
           specialization?: string
           updated_at?: string
+          verified?: boolean | null
         }
         Relationships: []
       }

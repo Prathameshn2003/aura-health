@@ -25,6 +25,7 @@ const MenstrualModule = lazy(() => import("./pages/MenstrualModule"));
 const MenopauseModule = lazy(() => import("./pages/MenopauseModule"));
 const Chatbot = lazy(() => import("./pages/Chatbot"));
 const Doctors = lazy(() => import("./pages/Doctors"));
+const FindSpecialist = lazy(() => import("./pages/FindSpecialist"));
 const Schemes = lazy(() => import("./pages/Schemes"));
 const HealthResources = lazy(() => import("./pages/HealthResources"));
 const Hygiene = lazy(() => import("./pages/Hygiene"));
@@ -93,6 +94,7 @@ const App = () => (
               <Route path="/modules/menopause" element={<ProtectedRoute><MenopauseModule /></ProtectedRoute>} />
               <Route path="/chatbot" element={<ProtectedRoute><Chatbot /></ProtectedRoute>} />
               <Route path="/doctors" element={<ProtectedRoute><Doctors /></ProtectedRoute>} />
+              <Route path="/find-specialist" element={<ProtectedRoute><FindSpecialist /></ProtectedRoute>} />
               <Route path="/schemes" element={<ProtectedRoute><Schemes /></ProtectedRoute>} />
               <Route path="/health-resources" element={<ProtectedRoute><HealthResources /></ProtectedRoute>} />
               <Route path="/hygiene" element={<ProtectedRoute><Hygiene /></ProtectedRoute>} />
