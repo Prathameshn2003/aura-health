@@ -221,31 +221,6 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {/* Doctor Consultation CTA */}
-        <div className="animate-fade-up" style={{ animationDelay: '300ms' }}>
-          <div className="glass-card rounded-2xl p-6 bg-gradient-to-r from-teal/10 to-primary/10">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-xl bg-teal/20 flex items-center justify-center">
-                  <Stethoscope className="w-6 h-6 text-teal" />
-                </div>
-                <div>
-                  <h3 className="font-heading font-semibold text-foreground">Need Medical Consultation?</h3>
-                  <p className="text-sm text-muted-foreground">Find trusted women's health specialists near you</p>
-                </div>
-              </div>
-              <div className="flex gap-3">
-                <Link to="/find-specialist">
-                  <Button className="gap-2"><Stethoscope className="w-4 h-4" /> Find Nearby Doctors</Button>
-                </Link>
-                <Button variant="outline" className="gap-2" onClick={() => window.open("https://www.google.com/maps/search/gynecologist+near+me", "_blank")}>
-                  <ArrowRight className="w-4 h-4" /> Google Maps
-                </Button>
-              </div>
-            </div>
-          </div>
-        </div>
-
         {/* Quick Resources Grid */}
         <div className="animate-fade-up" style={{ animationDelay: '400ms' }}>
           <h2 className="font-heading text-lg sm:text-xl font-semibold text-foreground mb-4">Quick Access</h2>
