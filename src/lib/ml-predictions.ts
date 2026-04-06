@@ -234,6 +234,7 @@ export interface MenopauseInputData {
   age: number;
   estrogenLevel: number; // 10-100
   fshLevel: number; // 5-80
+  amhLevel: number; // 0.1-5.0 ng/mL
   yearsSinceLastPeriod: number; // 0-10
   irregularPeriods: boolean;
   missedPeriods: boolean;
@@ -242,6 +243,7 @@ export interface MenopauseInputData {
   sleepProblems: boolean;
   vaginalDryness: boolean;
   jointPain: boolean;
+  anxietyLevel: 'none' | 'mild' | 'moderate' | 'severe';
 }
 
 export interface MenopauseResult {
@@ -288,16 +290,20 @@ export function predictMenopause(data: MenopauseInputData): MenopauseResult {
   else if (data.age >= 45) ageScore = 2;
   else if (data.age >= 40) ageScore = 1;
   
-  // Hormone score based on FSH and Estrogen
-  // High FSH (>25) and Low Estrogen (<30) = higher score
+  // Hormone score based on FSH, Estrogen, and AMH
   let hormoneScore = 0;
   if (data.fshLevel >= 40) hormoneScore += 2;
   else if (data.fshLevel >= 25) hormoneScore += 1;
   
   if (data.estrogenLevel <= 30) hormoneScore += 2;
   else if (data.estrogenLevel <= 50) hormoneScore += 1;
+
+  // AMH score - lower AMH indicates declining ovarian reserve
+  if (data.amhLevel <= 0.5) hormoneScore += 2;
+  else if (data.amhLevel <= 1.0) hormoneScore += 1;
   
-  // Symptom score (0-7)
+  // Symptom score (0-9) - includes anxiety
+  const anxietyScore = data.anxietyLevel === 'severe' ? 2 : data.anxietyLevel === 'moderate' ? 1.5 : data.anxietyLevel === 'mild' ? 1 : 0;
   const symptomScore = 
     (data.irregularPeriods ? 1 : 0) +
     (data.missedPeriods ? 1 : 0) +
@@ -305,7 +311,8 @@ export function predictMenopause(data: MenopauseInputData): MenopauseResult {
     (data.nightSweats ? 1 : 0) +
     (data.sleepProblems ? 1 : 0) +
     (data.vaginalDryness ? 1 : 0) +
-    (data.jointPain ? 1 : 0);
+    (data.jointPain ? 1 : 0) +
+    anxietyScore;
   
   // Period score
   let periodScore = 0;
@@ -314,8 +321,8 @@ export function predictMenopause(data: MenopauseInputData): MenopauseResult {
   else if (data.yearsSinceLastPeriod >= 0.5) periodScore = 2;
   else if (data.yearsSinceLastPeriod > 0) periodScore = 1;
   
-  // Total weighted score (max ~19)
-  const maxScore = 19;
+  // Total weighted score (max ~23: age 4 + hormone 6 + symptom 9 + period 4)
+  const maxScore = 23;
   const totalScore = ageScore + hormoneScore + symptomScore + periodScore;
   
   let riskPercentage = Math.round((totalScore / maxScore) * 100);

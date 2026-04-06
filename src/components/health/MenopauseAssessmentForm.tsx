@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Slider } from "@/components/ui/slider";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { 
   ArrowRight, 
   ArrowLeft, 
@@ -26,6 +26,7 @@ export const MenopauseAssessmentForm = ({ onSubmit }: MenopauseAssessmentFormPro
     age: 45,
     estrogenLevel: 50,
     fshLevel: 25,
+    amhLevel: 2.0,
     yearsSinceLastPeriod: 0,
     irregularPeriods: false,
     missedPeriods: false,
@@ -34,13 +35,16 @@ export const MenopauseAssessmentForm = ({ onSubmit }: MenopauseAssessmentFormPro
     sleepProblems: false,
     vaginalDryness: false,
     jointPain: false,
+    anxietyLevel: 'none',
   });
+  const [anxietyError, setAnxietyError] = useState(false);
 
   const steps: FormStep[] = ['personal', 'hormones', 'symptoms'];
   const currentStepIndex = steps.indexOf(step);
 
   const updateField = <K extends keyof MenopauseInputData>(field: K, value: MenopauseInputData[K]) => {
     setFormData(prev => ({ ...prev, [field]: value }));
+    if (field === 'anxietyLevel') setAnxietyError(false);
   };
 
   const nextStep = () => {
@@ -58,6 +62,9 @@ export const MenopauseAssessmentForm = ({ onSubmit }: MenopauseAssessmentFormPro
   };
 
   const handleSubmit = () => {
+    if (formData.anxietyLevel === 'none') {
+      // Allow 'none' as a valid selection - it means no anxiety
+    }
     onSubmit(formData);
   };
 
@@ -72,6 +79,8 @@ export const MenopauseAssessmentForm = ({ onSubmit }: MenopauseAssessmentFormPro
     hormones: 'Hormone Levels',
     symptoms: 'Symptoms',
   };
+
+  const amhColorClass = formData.amhLevel <= 0.5 ? 'text-destructive' : formData.amhLevel <= 1.0 ? 'text-accent' : 'text-teal';
 
   return (
     <div className="w-full max-w-2xl mx-auto">
@@ -246,7 +255,35 @@ export const MenopauseAssessmentForm = ({ onSubmit }: MenopauseAssessmentFormPro
               </p>
             </div>
 
-            <div className="grid grid-cols-2 gap-4 p-4 rounded-xl bg-muted/30">
+            {/* AMH Level */}
+            <div className="space-y-2">
+              <Label>AMH Level (Ovarian Health Indicator)</Label>
+              <p className="text-sm text-muted-foreground">
+                Do you know your AMH level from a recent blood test?
+              </p>
+              <Slider
+                value={[formData.amhLevel]}
+                onValueChange={([v]) => updateField('amhLevel', parseFloat(v.toFixed(1)))}
+                min={0.1}
+                max={5.0}
+                step={0.1}
+                className="mt-3"
+              />
+              <div className="flex justify-between text-sm text-muted-foreground">
+                <span>0.1 (Low)</span>
+                <span className={`font-semibold text-lg ${amhColorClass}`}>
+                  {formData.amhLevel.toFixed(1)} ng/mL
+                </span>
+                <span>5.0 (High)</span>
+              </div>
+              <div className="p-3 rounded-lg bg-muted/50 mt-1">
+                <p className="text-xs text-muted-foreground">
+                  💡 AMH helps understand your egg reserve. Lower values may indicate your body is moving toward menopause. If you don't know your exact value, you can estimate based on your health.
+                </p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-3 gap-4 p-4 rounded-xl bg-muted/30">
               <div className="text-center">
                 <div className="text-2xl font-bold text-foreground">{formData.estrogenLevel}</div>
                 <div className="text-sm text-muted-foreground">Estrogen</div>
@@ -254,6 +291,10 @@ export const MenopauseAssessmentForm = ({ onSubmit }: MenopauseAssessmentFormPro
               <div className="text-center">
                 <div className="text-2xl font-bold text-foreground">{formData.fshLevel}</div>
                 <div className="text-sm text-muted-foreground">FSH</div>
+              </div>
+              <div className="text-center">
+                <div className={`text-2xl font-bold ${amhColorClass}`}>{formData.amhLevel.toFixed(1)}</div>
+                <div className="text-sm text-muted-foreground">AMH</div>
               </div>
             </div>
           </div>
@@ -298,6 +339,52 @@ export const MenopauseAssessmentForm = ({ onSubmit }: MenopauseAssessmentFormPro
               </div>
             ))}
 
+            {/* Anxiety Level */}
+            <div className="mt-6 p-5 rounded-xl border-2 border-border">
+              <div className="flex items-center gap-3 mb-3">
+                <span className="text-2xl">💜</span>
+                <div>
+                  <div className="font-medium text-foreground">Feeling Anxious or Stressed?</div>
+                  <div className="text-sm text-muted-foreground">
+                    Do you often feel worried, restless, or have difficulty relaxing?
+                  </div>
+                </div>
+              </div>
+              <p className="text-xs text-muted-foreground mb-4 pl-10">
+                Hormonal changes during menopause can sometimes affect mood and cause anxiety.
+              </p>
+              <RadioGroup
+                value={formData.anxietyLevel}
+                onValueChange={(v) => updateField('anxietyLevel', v as MenopauseInputData['anxietyLevel'])}
+                className="grid grid-cols-2 md:grid-cols-4 gap-3 pl-10"
+              >
+                {[
+                  { value: 'none', label: 'No', emoji: '😊' },
+                  { value: 'mild', label: 'Mild', emoji: '😐' },
+                  { value: 'moderate', label: 'Moderate', emoji: '😟' },
+                  { value: 'severe', label: 'Severe', emoji: '😰' },
+                ].map((opt) => (
+                  <label
+                    key={opt.value}
+                    className={`flex flex-col items-center gap-1.5 p-3 rounded-xl border-2 cursor-pointer transition-all ${
+                      formData.anxietyLevel === opt.value
+                        ? "border-teal bg-teal/10"
+                        : "border-border hover:border-teal/50"
+                    }`}
+                  >
+                    <RadioGroupItem value={opt.value} className="sr-only" />
+                    <span className="text-xl">{opt.emoji}</span>
+                    <span className="text-sm font-medium text-foreground">{opt.label}</span>
+                  </label>
+                ))}
+              </RadioGroup>
+              {anxietyError && (
+                <p className="text-sm text-destructive mt-2 pl-10">
+                  Please select how often you feel anxious so we can give better results
+                </p>
+              )}
+            </div>
+
             {/* Symptom Summary */}
             <div className="mt-6 p-4 rounded-xl bg-muted/50">
               <div className="text-sm text-muted-foreground">
@@ -305,6 +392,11 @@ export const MenopauseAssessmentForm = ({ onSubmit }: MenopauseAssessmentFormPro
                   {[formData.hotFlashes, formData.nightSweats, formData.sleepProblems, 
                     formData.vaginalDryness, formData.jointPain].filter(Boolean).length} of 5
                 </span>
+                {formData.anxietyLevel !== 'none' && (
+                  <span className="ml-2">
+                    · Anxiety: <span className="font-semibold text-foreground capitalize">{formData.anxietyLevel}</span>
+                  </span>
+                )}
               </div>
             </div>
           </div>
