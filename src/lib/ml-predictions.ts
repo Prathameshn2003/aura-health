@@ -321,8 +321,8 @@ export function predictMenopause(data: MenopauseInputData): MenopauseResult {
   else if (data.yearsSinceLastPeriod >= 0.5) periodScore = 2;
   else if (data.yearsSinceLastPeriod > 0) periodScore = 1;
   
-  // Total weighted score (max ~19)
-  const maxScore = 19;
+  // Total weighted score (max ~23: age 4 + hormone 6 + symptom 9 + period 4)
+  const maxScore = 23;
   const totalScore = ageScore + hormoneScore + symptomScore + periodScore;
   
   let riskPercentage = Math.round((totalScore / maxScore) * 100);
