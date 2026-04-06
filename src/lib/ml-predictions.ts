@@ -302,7 +302,8 @@ export function predictMenopause(data: MenopauseInputData): MenopauseResult {
   if (data.amhLevel <= 0.5) hormoneScore += 2;
   else if (data.amhLevel <= 1.0) hormoneScore += 1;
   
-  // Symptom score (0-7)
+  // Symptom score (0-9) - includes anxiety
+  const anxietyScore = data.anxietyLevel === 'severe' ? 2 : data.anxietyLevel === 'moderate' ? 1.5 : data.anxietyLevel === 'mild' ? 1 : 0;
   const symptomScore = 
     (data.irregularPeriods ? 1 : 0) +
     (data.missedPeriods ? 1 : 0) +
@@ -310,7 +311,8 @@ export function predictMenopause(data: MenopauseInputData): MenopauseResult {
     (data.nightSweats ? 1 : 0) +
     (data.sleepProblems ? 1 : 0) +
     (data.vaginalDryness ? 1 : 0) +
-    (data.jointPain ? 1 : 0);
+    (data.jointPain ? 1 : 0) +
+    anxietyScore;
   
   // Period score
   let periodScore = 0;
