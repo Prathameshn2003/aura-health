@@ -290,14 +290,17 @@ export function predictMenopause(data: MenopauseInputData): MenopauseResult {
   else if (data.age >= 45) ageScore = 2;
   else if (data.age >= 40) ageScore = 1;
   
-  // Hormone score based on FSH and Estrogen
-  // High FSH (>25) and Low Estrogen (<30) = higher score
+  // Hormone score based on FSH, Estrogen, and AMH
   let hormoneScore = 0;
   if (data.fshLevel >= 40) hormoneScore += 2;
   else if (data.fshLevel >= 25) hormoneScore += 1;
   
   if (data.estrogenLevel <= 30) hormoneScore += 2;
   else if (data.estrogenLevel <= 50) hormoneScore += 1;
+
+  // AMH score - lower AMH indicates declining ovarian reserve
+  if (data.amhLevel <= 0.5) hormoneScore += 2;
+  else if (data.amhLevel <= 1.0) hormoneScore += 1;
   
   // Symptom score (0-7)
   const symptomScore = 
