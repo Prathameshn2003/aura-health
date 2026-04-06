@@ -234,6 +234,7 @@ export interface MenopauseInputData {
   age: number;
   estrogenLevel: number; // 10-100
   fshLevel: number; // 5-80
+  amhLevel: number; // 0.1-5.0 ng/mL
   yearsSinceLastPeriod: number; // 0-10
   irregularPeriods: boolean;
   missedPeriods: boolean;
@@ -242,6 +243,7 @@ export interface MenopauseInputData {
   sleepProblems: boolean;
   vaginalDryness: boolean;
   jointPain: boolean;
+  anxietyLevel: 'none' | 'mild' | 'moderate' | 'severe';
 }
 
 export interface MenopauseResult {
